@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hiranandani Gallery — How we build it</title>
+<style>
+/* Fixed brand palette. Deliberately not theme-reactive: the Gallery is warm ivory,
+   and an auto dark variant is where contrast bugs come from. */
+:root{
+  color-scheme:only light;
+  --paper:#F4EFE7;      /* page */
+  --card:#FBF8F3;       /* raised surface */
+  --choc:#4A3428;       /* dark surface */
+  --onchoc:#F4EFE7;     /* text on dark surface */
+  --ink:#3A2B21;        /* body text on light */
+  --soft:#6E5A4C;       /* secondary text on light */
+  --muted:#7E675A;      /* tertiary text on light */
+  --line:#E0D6C6;       /* hairlines */
+  --gold:#A68B5B;       /* decorative rules only */
+  --goldink:#7A5F32;    /* gold used as text */
+  --golddeep:#7E6234;   /* gold as a filled background */
+  --disp:Optima,"Optima nova",Candara,"Gill Sans","Gill Sans MT","Segoe UI",sans-serif;
+  --body:"SF Pro Text","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-weight:300;line-height:1.6;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:0 28px}
+
+header{background:var(--choc);color:var(--onchoc);padding:64px 0 56px}
+h1{font-family:var(--disp);font-weight:400;font-size:clamp(32px,5.2vw,52px);
+  margin:0 0 18px;line-height:1.12;color:var(--onchoc)}
+header p{margin:0;color:var(--onchoc);opacity:.88;font-size:16px;max-width:34em}
+.hrule{width:56px;height:1px;background:var(--gold);margin:26px 0 0}
+
+.pbar{position:sticky;top:0;z-index:30;background:var(--paper);
+  border-bottom:1px solid var(--line);padding:14px 0}
+.pinner{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.track{flex:1;min-width:150px;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--golddeep);transition:width .35s ease}
+.pcount{font-size:13px;color:var(--soft);white-space:nowrap;font-variant-numeric:tabular-nums}
+.stamp{font-size:12px;color:var(--muted);white-space:nowrap}
+.reset{font-family:var(--body);font-size:12px;color:var(--soft);background:transparent;
+  border:1px solid var(--line);border-radius:4px;padding:6px 12px;cursor:pointer}
+.reset:hover{border-color:var(--golddeep);color:var(--ink)}
+
+section{padding:60px 0 10px}
+.kick{font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--goldink);margin:0 0 12px}
+h2{font-family:var(--disp);font-weight:400;font-size:clamp(24px,3.6vw,34px);
+  margin:0 0 12px;line-height:1.2;color:var(--ink)}
+.lede{font-size:16px;color:var(--soft);max-width:40em;margin:0 0 34px}
+
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:26px}
+@media(max-width:820px){.steps{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.steps{grid-template-columns:1fr}}
+.stepbtn{text-align:left;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:16px 14px;cursor:pointer;font-family:var(--body);
+  color:var(--ink);transition:.18s;display:flex;flex-direction:column;gap:5px}
+.stepbtn:hover{border-color:var(--golddeep)}
+.stepbtn.on{background:var(--choc);border-color:var(--choc);color:var(--onchoc)}
+.snum{font-family:var(--disp);font-size:20px;line-height:1;color:inherit}
+.slabel{font-size:13.5px;line-height:1.3;color:inherit}
+.scount{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.stepbtn.on .scount{color:var(--onchoc);opacity:.85}
+.stepdesc{display:none;background:var(--card);border-left:2px solid var(--golddeep);
+  padding:14px 18px;border-radius:0 8px 8px 0;font-size:15px;color:var(--soft);
+  margin-bottom:26px;max-width:52em}
+.stepdesc.on{display:block}
+
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:760px){.pgrid{grid-template-columns:1fr}}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+.pcard.done{border-color:var(--golddeep)}
+.prow{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.pname{font-family:var(--disp);font-size:19px;line-height:1.25;color:var(--ink)}
+.pdesc{font-size:14px;color:var(--soft);margin:8px 0 14px}
+.pfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border-top:1px solid var(--line);padding-top:12px;flex-wrap:wrap}
+.pwho{font-size:12px;color:var(--muted);white-space:nowrap}
+.pinput{flex:1;min-width:120px;background:transparent;border:none;
+  border-bottom:1px solid var(--line);font-family:var(--body);font-size:13.5px;
+  color:var(--ink);padding:3px 2px;outline:none}
+.pinput::placeholder{color:var(--muted);opacity:1}
+.pinput:focus{border-bottom-color:var(--golddeep)}
+.pstatus{font-family:var(--body);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid var(--line);background:transparent;color:var(--soft);
+  border-radius:20px;padding:5px 12px;cursor:pointer;white-space:nowrap;transition:.18s}
+.pstatus[data-s="1"]{color:var(--soft);border-color:var(--muted)}
+.pstatus[data-s="2"]{color:var(--goldink);border-color:var(--goldink)}
+.pstatus[data-s="3"]{background:var(--golddeep);border-color:var(--golddeep);color:#FFFFFF}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.chip{font-family:var(--body);font-size:12.5px;background:transparent;color:var(--soft);
+  border:1px solid var(--line);border-radius:20px;padding:6px 14px;cursor:pointer;transition:.18s}
+.chip:hover{border-color:var(--golddeep);color:var(--ink)}
+.chip.on{background:var(--choc);border-color:var(--choc);color:var(--onchoc)}
+
+.group{margin-bottom:34px}
+.ghead{font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--goldink);padding-bottom:8px;border-bottom:1px solid var(--line);
+  margin-bottom:2px;display:flex;justify-content:space-between}
+.gcount{color:var(--soft);letter-spacing:.04em}
+.item{display:flex;gap:14px;align-items:flex-start;padding:14px 4px;
+  border-bottom:1px solid var(--line);cursor:pointer}
+.item:hover{background:var(--card)}
+.box{flex:none;width:17px;height:17px;margin-top:3px;border:1.5px solid var(--muted);
+  border-radius:4px;background:#FFFFFF;position:relative;transition:.15s}
+.item.done .box{background:var(--golddeep);border-color:var(--golddeep)}
+.item.done .box::after{content:"";position:absolute;left:5px;top:1px;width:4px;height:9px;
+  border:solid #FFFFFF;border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.itext{flex:1;min-width:0}
+.ititle{font-size:15px;line-height:1.45;color:var(--ink)}
+.iwhy{font-size:13.5px;color:var(--soft);margin-top:4px;line-height:1.5}
+.imeta{font-size:11.5px;color:var(--muted);margin-top:6px;letter-spacing:.03em}
+.item.done .ititle{text-decoration:line-through;color:var(--muted)}
+.item.done .box{opacity:1}
+.item.done .iwhy,.item.done .imeta{color:var(--muted)}
+.empty{color:var(--soft);font-size:15px;padding:30px 0}
+
+.autosave{font-size:12px;color:var(--muted);white-space:nowrap}
+
+.howto-sec{padding-top:46px}
+.howto{background:var(--card);border:1px solid var(--line);border-left:2px solid var(--golddeep);
+  border-radius:0 10px 10px 0;padding:24px 28px}
+.hkick{font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--goldink);margin-bottom:14px}
+.hlist{margin:0;padding-left:20px}
+.hlist li{font-size:15px;color:var(--soft);margin-bottom:10px;line-height:1.55}
+.hlist li:last-child{margin-bottom:0}
+.hlist b{color:var(--ink);font-weight:500}
+.hnote{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+  font-size:13.5px;color:var(--muted);line-height:1.5}
+
+.backup{display:flex;justify-content:space-between;align-items:center;gap:20px;
+  flex-wrap:wrap;border-top:1px solid var(--line);margin-top:50px;padding-top:24px}
+.bktitle{font-size:13px;color:var(--ink)}
+.bknote{font-size:12.5px;color:var(--muted);max-width:34em;margin-top:3px}
+.bkbtns{display:flex;gap:8px;flex-wrap:wrap}
+
+footer{text-align:center;font-size:12px;color:var(--muted);padding:34px 0 70px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Hiranandani Gallery<br>How we build it</h1>
+    <p>Five steps, in order. Pick the partners first, then work the list.
+    Everything you tick is saved on this device.</p>
+    <div class="hrule"></div>
+  </div>
+</header>
+
+<div class="pbar">
+  <div class="wrap pinner">
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <div class="pcount" id="pcount">0 of 200 done</div>
+    <div class="stamp" id="stamp"></div>
+    <span class="autosave">Saves automatically</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="howto-sec">
+    <div class="howto">
+      <div class="hkick">How to use this page</div>
+      <ol class="hlist">
+        <li><b>Start with the companies below.</b> Tap the status pill to move a partner along —
+          Not started, Talking to them, Shortlisted, Appointed. Type the company name in the line beside it.</li>
+        <li><b>Then work the list.</b> Tap any task to tick it off. Tap again to untick.</li>
+        <li><b>Use the five step buttons to focus.</b> Tap “2. Pick partners” to see only what is live now.
+          Tap it again to show everything.</li>
+        <li><b>Use the area buttons to split the work.</b> Tap “Outside” to give the Projects Lead their
+          list, “Coffee &amp; food” for the House Manager, and so on.</li>
+        <li><b>Nothing needs saving.</b> Every tick is stored on this device the moment you make it.
+          Close the tab and come back whenever — it will be exactly as you left it.</li>
+      </ol>
+      <div class="hnote">Progress is kept in this browser, on this device. If someone else opens the
+        page on their own laptop they will start from a blank copy. Use Back up progress at the
+        foot of the page to hand a snapshot to someone else.</div>
+    </div>
+  </section>
+
+  <section>
+    <p class="kick">First</p>
+    <h2>Choose the companies</h2>
+    <p class="lede">Fourteen partners. Nothing gets ordered until the company behind it is appointed —
+    otherwise we buy the wrong thing and buy it twice. Tap the status to move it along.</p>
+    <div class="pgrid">
+      <div class="pcard" data-p="0">
+        <div class="prow">
+          <div class="pname">Facility management</div>
+          <button class="pstatus" data-i="0">Not started</button>
+        </div>
+        <div class="pdesc">Housekeeping, maintenance, security, changing bulbs, scent refills.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by House Manager</span>
+          <input class="pinput" data-i="0" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="1">
+        <div class="prow">
+          <div class="pname">Coffee &amp; food operator</div>
+          <button class="pstatus" data-i="1">Not started</button>
+        </div>
+        <div class="pdesc">Runs the Barista Bar — staff, training, the coffee programme.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by House Manager</span>
+          <input class="pinput" data-i="1" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="2">
+        <div class="prow">
+          <div class="pname">Fragrance house</div>
+          <button class="pstatus" data-i="2">Not started</button>
+        </div>
+        <div class="pdesc">Makes the signature scent, the candles and the take-home item.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Brand Lead</span>
+          <input class="pinput" data-i="2" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="3">
+        <div class="prow">
+          <div class="pname">Florist</div>
+          <button class="pstatus" data-i="3">Not started</button>
+        </div>
+        <div class="pdesc">Fresh arrangements twice a week, and the vessels they sit in.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Brand Lead</span>
+          <input class="pinput" data-i="3" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="4">
+        <div class="prow">
+          <div class="pname">Uniform maker</div>
+          <button class="pstatus" data-i="4">Not started</button>
+        </div>
+        <div class="pdesc">Uniforms for all seven roles, plus the gold-and-bone lapel pin.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Brand Lead</span>
+          <input class="pinput" data-i="4" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="5">
+        <div class="prow">
+          <div class="pname">Lighting consultant</div>
+          <button class="pstatus" data-i="5">Not started</button>
+        </div>
+        <div class="pdesc">Picks the fixtures and comes back at night to aim them. Not a fixture seller.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Projects Lead</span>
+          <input class="pinput" data-i="5" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="6">
+        <div class="prow">
+          <div class="pname">Landscape contractor</div>
+          <button class="pstatus" data-i="6">Not started</button>
+        </div>
+        <div class="pdesc">Plants it, then keeps it alive. Both in one contract.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Projects Lead</span>
+          <input class="pinput" data-i="6" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="7">
+        <div class="prow">
+          <div class="pname">Signage maker</div>
+          <button class="pstatus" data-i="7">Not started</button>
+        </div>
+        <div class="pdesc">The backlit house sign, gate signage and wayfinding.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Projects Lead</span>
+          <input class="pinput" data-i="7" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="8">
+        <div class="prow">
+          <div class="pname">Interior designer</div>
+          <button class="pstatus" data-i="8">Not started</button>
+        </div>
+        <div class="pdesc">Palette, furniture, the Conversation Rooms.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Brand Lead</span>
+          <input class="pinput" data-i="8" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="9">
+        <div class="prow">
+          <div class="pname">Main contractor</div>
+          <button class="pstatus" data-i="9">Not started</button>
+        </div>
+        <div class="pdesc">Removes the model, builds the bar, does the washrooms.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Projects Lead</span>
+          <input class="pinput" data-i="9" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="10">
+        <div class="prow">
+          <div class="pname">App developer</div>
+          <button class="pstatus" data-i="10">Not started</button>
+        </div>
+        <div class="pdesc">The Hiranandani application and the iPad control surface.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Sales Lead</span>
+          <input class="pinput" data-i="10" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="11">
+        <div class="prow">
+          <div class="pname">AV company</div>
+          <button class="pstatus" data-i="11">Not started</button>
+        </div>
+        <div class="pdesc">Screens, mounting, casting, hiding every cable.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Projects Lead</span>
+          <input class="pinput" data-i="11" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="12">
+        <div class="prow">
+          <div class="pname">Service trainer</div>
+          <button class="pstatus" data-i="12">Not started</button>
+        </div>
+        <div class="pdesc">Writes how the team greets people, then audits it quarterly.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by House Manager</span>
+          <input class="pinput" data-i="12" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+      <div class="pcard" data-p="13">
+        <div class="prow">
+          <div class="pname">Printer</div>
+          <button class="pstatus" data-i="13">Not started</button>
+        </div>
+        <div class="pdesc">Menus, notepads, cards, the take-home folder.</div>
+        <div class="pfoot">
+          <span class="pwho">Chosen by Brand Lead</span>
+          <input class="pinput" data-i="13" placeholder="Company name…" autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="kick">Then</p>
+    <h2>Work the list</h2>
+    <p class="lede">Two hundred tasks. Filter by step to see what is live now, or by area to hand
+    one person their own list.</p>
+
+    <div class="steps">
+      <button class="stepbtn" data-step="1. Decide">
+        <span class="snum">1</span>
+        <span class="slabel">Decide</span>
+        <span class="scount" data-c="1. Decide"></span>
+      </button>
+      <button class="stepbtn" data-step="2. Pick partners">
+        <span class="snum">2</span>
+        <span class="slabel">Pick partners</span>
+        <span class="scount" data-c="2. Pick partners"></span>
+      </button>
+      <button class="stepbtn" data-step="3. Order & build">
+        <span class="snum">3</span>
+        <span class="slabel">Order & build</span>
+        <span class="scount" data-c="3. Order & build"></span>
+      </button>
+      <button class="stepbtn" data-step="4. Train & open">
+        <span class="snum">4</span>
+        <span class="slabel">Train & open</span>
+        <span class="scount" data-c="4. Train & open"></span>
+      </button>
+      <button class="stepbtn" data-step="5. Keep it running">
+        <span class="snum">5</span>
+        <span class="slabel">Keep it running</span>
+        <span class="scount" data-c="5. Keep it running"></span>
+      </button>
+    </div>
+
+    <div class="stepdesc" data-step="1. Decide">Answer the big questions first. Budget, the show flat, who runs this. Nothing else starts until these are settled.</div>
+    <div class="stepdesc" data-step="2. Pick partners">Choose every company before you buy anything from them.</div>
+    <div class="stepdesc" data-step="3. Order & build">Place the orders. Build the bar, plant, light, install.</div>
+    <div class="stepdesc" data-step="4. Train & open">Hire the team, train them against the written standard, then soft open.</div>
+    <div class="stepdesc" data-step="5. Keep it running">The routines that stop it decaying. This one never finishes.</div>
+
+    <div class="chips" id="chips">
+      <button class="chip on" data-area="all">All areas</button>
+        <button class="chip" data-area="Decisions">Decisions</button>
+        <button class="chip" data-area="The team">The team</button>
+        <button class="chip" data-area="Outside">Outside</button>
+        <button class="chip" data-area="Inside">Inside</button>
+        <button class="chip" data-area="Coffee & food">Coffee & food</button>
+        <button class="chip" data-area="Scent, uniforms & print">Scent, uniforms & print</button>
+        <button class="chip" data-area="Screens & app">Screens & app</button>
+    </div>
+
+    <div id="list"></div>
+  </section>
+
+</div>
+
+<div class="wrap">
+  <div class="backup">
+    <div>
+      <div class="bktitle">Back up progress</div>
+      <div class="bknote">Only needed to move progress to another device or person.
+        Everyday use needs none of this.</div>
+    </div>
+    <div class="bkbtns">
+      <button class="reset" id="save">Download a copy</button>
+      <button class="reset" id="load">Restore from a copy</button>
+      <button class="reset" id="reset">Clear all</button>
+      <input type="file" id="file" accept="application/json" hidden>
+    </div>
+  </div>
+</div>
+
+<footer>Hiranandani Gallery · working document</footer>
+
+<script>
+const TASKS = [{"area": "Decisions", "task": "Appoint an interim programme owner", "why": "The House Manager does not exist yet. Someone holds it until they join.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Approve total budget, split capex and opex", "why": "The running cost is the one that gets forgotten. Flowers, laundry, scent, coffee are monthly forever.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Set spend approval limits and signatories", "why": "Without this every small order waits three weeks and the programme crawls.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Decide: keep or remove the permanent show flat", "why": "Releases floor area and blocks the Interiors plan until answered.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Confirm Experience Room deferred to round two", "why": "Lets everything else open without it. Confirm so nobody plans around it.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Confirm removal of the Alibaug model", "why": "Already on the plan. Confirm so the floor plan can be redrawn.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Confirm Juice Bar becomes the Barista Bar", "why": "Changes plumbing, power and extraction. A construction decision, not a menu one.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Decide front-of-house payroll: ours or the partner's", "why": "Changes recruitment by 8-10 weeks either way. Needed in month one.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Agree gate dates and opening month", "why": "Relaxed pace, roughly twelve months. Fix the gates, not the tasks.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Appoint the brand guardian who says yes or no on taste", "why": "One person settles taste arguments. Otherwise every choice is relitigated.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Draft the service-partner contract template", "why": "Service partners stay. Contract them on written standards, not scope of works.", "step": "2. Pick partners", "who": "Leadership"}, {"area": "Decisions", "task": "Draft the build-partner contract template", "why": "Scope, retention held until snagging closes.", "step": "2. Pick partners", "who": "Leadership"}, {"area": "Decisions", "task": "Set up the programme tracker and monthly review", "why": "Seven owners, one meeting. Anything not reviewed monthly drifts.", "step": "1. Decide", "who": "Leadership"}, {"area": "Decisions", "task": "Define what 'done' means at each gate, in writing", "why": "Gates only work if the bar is written down before you reach them.", "step": "1. Decide", "who": "Leadership"}, {"area": "The team", "task": "Write the House Manager job spec", "why": "Owns the standard daily. The single most important hire here.", "step": "1. Decide", "who": "Leadership"}, {"area": "The team", "task": "Recruit and appoint the House Manager", "why": "8-10 weeks. Start at G0 so they own design decisions at G1.", "step": "1. Decide", "who": "Leadership"}, {"area": "The team", "task": "Rewrite Sales Executive spec as Residence Advisor", "why": "Same people, wider brief — owns the customer from first call to closure.", "step": "2. Pick partners", "who": "Sales Lead"}, {"area": "The team", "task": "Define headcount per role, per shift", "why": "How many on a Tuesday, how many on a Sunday. Decides the whole wage line.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Write the roster including weekly offs and cover", "why": "Decide now who covers the Doorman's day off, or the door is empty weekly.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Appoint the facility management partner", "why": "One contract instead of twelve hires. Write the housekeeping standard in.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Write the housekeeping standard into the FM contract", "why": "Do not assume they know what immaculate means here.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Appoint the service training consultant", "why": "Hotel background. Writes the protocol, then audits it quarterly.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Write the arrival script for Gate, Valet and Doorman", "why": "Word for word first, then let them make it their own.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Build the daily expected-guest list mechanism", "why": "This is the actual machinery behind 'welcomed by name'. Advisor enters, Gate reads.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Write the unexpected-arrival protocol", "why": "Someone always turns up unlisted. Decide how they are welcomed, not interrogated.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Write the cool towel ritual", "why": "When offered, how presented, on what tray, at what temperature, who clears.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Define 'quietly present, never hovering' in feet", "why": "Put a number on it or it means nothing on a shift.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Map the six moments and the Sales-Hospitality handovers", "why": "Before, Arrive, Settle, Consider, Depart, After. The guest must never feel it.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Write the departure sequence", "why": "Host signals the Valet before anyone stands. The car is already waiting.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Write the 'nevers' list", "why": "No clipboards. No badges on seniors. Nobody across a desk. Easier to hold than the always.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Write the grooming standard", "why": "Shoes, hair, watches, visible phones. Unglamorous, and it is the whole difference.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Write the daily room reset standard", "why": "Back to the reference photograph. Cushions, chairs, books, glassware.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "The team", "task": "Recruit the Gate Team", "why": "Recruit for warmth. The rest is teachable.", "step": "4. Train & open", "who": "House Manager"}, {"area": "The team", "task": "Recruit Valet Attendants", "why": "", "step": "4. Train & open", "who": "House Manager"}, {"area": "The team", "task": "Recruit the Doorman", "why": "Owns the threshold.", "step": "4. Train & open", "who": "House Manager"}, {"area": "The team", "task": "Recruit House Hosts", "why": "Owns the visit, arrival to departure.", "step": "4. Train & open", "who": "House Manager"}, {"area": "The team", "task": "Recruit the F&B Service Team", "why": "Serve, clear, reset.", "step": "4. Train & open", "who": "House Manager"}, {"area": "The team", "task": "Build the induction pack from the protocol", "why": "Something you could hand a new joiner on day one.", "step": "4. Train & open", "who": "House Manager"}, {"area": "The team", "task": "Train every role against the written protocol", "why": "", "step": "4. Train & open", "who": "House Manager"}, {"area": "The team", "task": "Run three mock visits with staff as guests", "why": "Uncomfortable, and it finds the gaps before a real guest does.", "step": "4. Train & open", "who": "House Manager"}, {"area": "The team", "task": "Book quarterly service audits into the calendar", "why": "Standards slip in about three months. If it is not in the diary it will not happen.", "step": "5. Keep it running", "who": "House Manager"}, {"area": "The team", "task": "Set up the mystery-visit programme", "why": "The only honest measure you have.", "step": "5. Keep it running", "who": "House Manager"}, {"area": "Outside", "task": "Appoint the lighting consultant", "why": "A supplier sells fixtures. A consultant tells you half belong elsewhere.", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Outside", "task": "Agree one colour temperature across the property", "why": "Around 2700K everywhere. Mixed temperature is what makes a space read cheap at night.", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Outside", "task": "Design the exterior lighting layout", "why": "", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Outside", "task": "Order bollard lights for the entry path", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Order bollard lights for the car park", "why": "Today it is lit for safety, not for arrival. Different jobs.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Order tree uplights", "why": "Two or three per tree, at the base, aimed into the canopy.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Order facade and portico wash lighting", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Order concealed strip lighting for planting beds", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Install all exterior lighting", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Set exterior timers and scenes", "why": "Decide what is on at 7pm, at midnight, and what is off.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Commission the lighting on site after dark", "why": "Every fixture aimed by hand. The step everyone skips, and the one that matters.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Write the lamp-replacement SLA into the FM contract", "why": "One dead uplight undoes the whole effect.", "step": "3. Order & build", "who": "House Manager"}, {"area": "Outside", "task": "Appoint the landscape contractor", "why": "Planting and maintenance in one contract, or you get dead beds by month eight.", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Outside", "task": "Design the layered planting scheme", "why": "Tall at the back, mid-height shrubs, low flowering in front. Depth reads as designed.", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Outside", "task": "Confirm final species list", "why": "No olive trees. Confirm what replaces them before ordering.", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Outside", "task": "Detail the bed edging and kerbs", "why": "A clean edge does more than an expensive plant.", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Outside", "task": "Extend irrigation to every new bed", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Order and install planting", "why": "Mature stock has a long lead. Order as soon as species are fixed.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Agree the weekly landscape maintenance schedule", "why": "Trimming, dead-heading, replacing failures.", "step": "3. Order & build", "who": "House Manager"}, {"area": "Outside", "task": "Appoint the signage fabricator", "why": "", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Outside", "task": "Design the backlit house sign", "why": "Stone with halo-lit letters.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Outside", "task": "Approve a night mock-up before fabrication", "why": "Backlighting looks beautiful or cheap, and daylight tells you nothing.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Outside", "task": "Confirm monsoon weatherproofing rating", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Fabricate and install the house sign", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Refresh gate signage and wayfinding to match", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Build the valet console", "why": "Smoked oak, travertine top. Keys, radio and materials concealed.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Add concealed power and charging in the console", "why": "Otherwise there is a cable across the floor by week two.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Outside", "task": "Order branded umbrellas and the stand", "why": "Rain or sun. Offered before the guest asks.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Outside", "task": "Order monsoon outerwear for the outdoor team", "why": "Four months a year this is what guests see.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Outside", "task": "Define the chauffeur pick-up service", "why": "Which car, who drives, what the interior standard is. Booked by the Advisor.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Outside", "task": "Tidy and resurface the car park approach", "why": "It is part of the arrival whether we designed it or not.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Appoint the interior designer", "why": "", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Inside", "task": "Build the physical material board", "why": "Limestone, travertine, smoked oak, bronze, linen, leather, ceramics. Something you can hold.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Inside", "task": "Approve the six-colour palette as painted swatches", "why": "Screens lie about colour. Warm ivory through deep chocolate.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Inside", "task": "Build a sample corner in the real space", "why": "One wall, one floor, one chair, one light. Approve that before rolling out.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Inside", "task": "Sign off the sample corner", "why": "This is the gate that saves an expensive mistake.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Inside", "task": "Audit existing interior fittings for colour temperature", "why": "One mismatched downlight ruins a room.", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Inside", "task": "Design layered interior lighting", "why": "Table, floor and wall lights. Pools of light, not an evenly lit box. The biggest tell.", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Inside", "task": "Install dimmers on every zone", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Programme morning, afternoon and evening scenes", "why": "Set once, then nobody thinks about it again.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Add accent lighting to artwork and objects", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Audit existing furniture: keep, replace or reupholster", "why": "Anything that reads showroom goes, even if it is nearly new.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Inside", "task": "Specify and order Grand Salon seating", "why": "If it is not comfortable the visit gets shorter. That is commercial, not decorative.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Order side tables so every seat can hold a cup", "why": "Nowhere to put a coffee is the commonest failure in a beautiful room.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Order rugs", "why": "Also fixes acoustics. Stone rooms echo, and echo makes conversation feel public.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Order curtains and sheers where there is glare", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Reupholster retained frames in the House palette", "why": "Cheaper and faster than new, if the frames are good.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Curate objects and ceramics", "why": "Real things chosen one at a time, not a stylist's box of props.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Source real books people would open", "why": "Architecture, design, photography. Not colour-blocked filler.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Commission or select artwork", "why": "Longest lead item in this workstream. Start at G1.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Inside", "task": "Photograph the correct state of every room", "why": "Pin it up for housekeeping. The only way reset means one thing.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Inside", "task": "Design the Conversation Rooms as private libraries", "why": "A residential salon. Bookshelves, lamps, soft seating.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Inside", "task": "Remove every desk with opposite seating", "why": "Nobody sits across a desk. The conversation happens side by side.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Acoustically treat the Conversation Rooms", "why": "These conversations are about money and family. If the next room hears, the room failed.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Integrate the screen into the joinery", "why": "It is not a television. It should be quiet when not in use.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Conceal all cabling and power", "why": "One visible cable and the room stops being a home.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Check screen sightlines from every seat", "why": "Including the child on the sofa arm.", "step": "3. Order & build", "who": "Sales Lead"}, {"area": "Inside", "task": "Add a refreshment surface separate from the working surface", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Remove the Alibaug model and make good", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Decide the use of the freed floor area", "why": "Do not leave it empty and decide later. Empty space fills with clutter in a month.", "step": "2. Pick partners", "who": "Leadership"}, {"area": "Inside", "task": "Act on the show flat decision and redraw the plan", "why": "", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Inside", "task": "Order Villeroy & Boch sanitaryware", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Install sanitaryware and upgrade washroom finishes", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Fix washroom lighting quality", "why": "This is where people look at themselves. Warm and flattering, never clinical.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Inside", "task": "Add the washroom scent diffusion point", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Order individual cotton hand towels and the tray", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Set towel par stock and laundry cycle", "why": "Individual towels means real volume. Calculate daily use and hold three times it.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Inside", "task": "Choose and order a well-designed bin", "why": "It is in the deck for a reason. It is the object everyone gets wrong.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Inside", "task": "Set the 30-minute washroom check log", "why": "Logged, not assumed.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Inside", "task": "Snag the whole space and hold retention", "why": "Walk it with a torch. Do not release final payment before the list is empty.", "step": "4. Train & open", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Appoint the F&B / coffee partner", "why": "Ask directly whether they will run a small bar that is not a public cafe.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "Coffee & food", "task": "Design the Barista Bar to the larger footprint", "why": "", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Run water supply and drainage to the bar", "why": "Coffee machines need a dedicated line and proper waste. This is the one that gets missed.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Install water treatment and filtration", "why": "Mumbai water will destroy the machine and ruin the coffee. Non-negotiable.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Run dedicated power for machine and grinder", "why": "Check the load. An espresso machine on a shared circuit will trip it.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Design extraction and ventilation", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Design under-counter refrigeration and ice", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Design the back counter and concealed storage", "why": "Cups, beans, tools, cloths out of sight. A visible working mess kills it.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Solve the grinder acoustics", "why": "A grinder mid-conversation carries across a stone room. Site it and treat it.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Design the pantry-to-bar service route", "why": "Food comes from the pantry. Keep the route out of the guest area.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "Coffee & food", "task": "Order espresso machine, grinder and brewing equipment", "why": "Six to eight weeks. Order the moment the bar design is frozen.", "step": "3. Order & build", "who": "House Manager"}, {"area": "Coffee & food", "task": "Build and install the bar", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Run a full week of live service before opening", "why": "Coffee made and served properly, every day, before a guest sees it.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Coffee & food", "task": "Open the Araku coffee supply account", "why": "", "step": "2. Pick partners", "who": "House Manager"}, {"area": "Coffee & food", "task": "Open the TGL tea supply account", "why": "", "step": "2. Pick partners", "who": "House Manager"}, {"area": "Coffee & food", "task": "Confirm Himalayan still and sparkling supply", "why": "", "step": "2. Pick partners", "who": "House Manager"}, {"area": "Coffee & food", "task": "Finalise the House Spritz recipe", "why": "White peach, jasmine tea, verjus, Himalayan sparkling. Pale, dry, aromatic, barely sweet.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "Coffee & food", "task": "Confirm the four food items with Speciality Experiences", "why": "Eclair, brie tart, dumpling, chocolate caramel tart.", "step": "2. Pick partners", "who": "House Manager"}, {"area": "Coffee & food", "task": "Confirm the pantry can produce the menu daily at volume", "why": "How much notice for a Sunday with twelve appointments?", "step": "2. Pick partners", "who": "House Manager"}, {"area": "Coffee & food", "task": "Agree delivery cadence and notice period", "why": "", "step": "2. Pick partners", "who": "House Manager"}, {"area": "Coffee & food", "task": "Upgrade pantry equipment, refrigeration and storage", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Photograph the plating standard for the pantry wall", "why": "The only way plating stays consistent across shifts.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Coffee & food", "task": "Route waste and bins away from guest sightlines", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Select and order thin-rim crystal", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Coffee & food", "task": "Select and order handmade stoneware", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Coffee & food", "task": "Select and order the tea set", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Coffee & food", "task": "Select and order the coffee service", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Coffee & food", "task": "Order smoked oak and leather trays", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Coffee & food", "task": "Order 30% breakage stock in the first order", "why": "Handmade stoneware cannot be matched later. Buy spares now or accept a mismatched set.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Coffee & food", "task": "Design padded storage for crystal and stoneware", "why": "Not a shelf in the pantry.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Coffee & food", "task": "Write the polishing and handling standard", "why": "Fingerprints on thin-rim crystal are visible across a room.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Coffee & food", "task": "Order cool towels, tray and chiller", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Coffee & food", "task": "Set the cool towel laundry cycle", "why": "Used and washed dozens of times a day.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Scent, uniforms & print", "task": "Appoint the fragrance house", "why": "", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Brief Hiranandani No. 01", "why": "Bergamot, fig leaf, cedarwood, vetiver, soft amber.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Secure written exclusivity on the blend", "why": "Otherwise the same scent appears in a competitor's lobby next year.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Approve the blend in the actual space", "why": "Scent behaves differently in a stone room than in a sample vial.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Decide diffusion method per zone with the MEP team", "why": "Entrance, salon, conversation rooms, corridors, washrooms. HVAC-linked or standalone.", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Scent, uniforms & print", "task": "Set scent intensity per zone", "why": "Noticeable at the entrance, barely there in a Conversation Room. Too much is worse than none.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Scent, uniforms & print", "task": "Install diffusion across all five zones", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Scent, uniforms & print", "task": "Order candles in the blend", "why": "Cannot start until the blend is approved. The long pole.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Order the take-home item in the blend", "why": "The optional memory. Same scent, so it recalls the room months later.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Design the take-home packaging", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Write the scent refill schedule into the FM contract", "why": "Monthly, forever, or it quietly stops.", "step": "3. Order & build", "who": "House Manager"}, {"area": "Scent, uniforms & print", "task": "Appoint the uniform maker", "why": "", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Design uniforms for all seven roles", "why": "Same world, different weight. Ivory, taupe, mocha, deep chocolate.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Produce the gold-and-bone lapel pin, with spares", "why": "Senior uniforms carry no printed logo, only the pin. They get lost constantly.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Wear-test one full sample for a week before bulk", "why": "Mumbai humidity. Showroom fabric can wilt by 11am. Test on a real shift.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Order three sets per person", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Agree the uniform laundry cycle and clean-stock storage", "why": "Daily turnaround. Decide in-house or contracted now.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Scent, uniforms & print", "task": "Order staff changing and wardrobe storage", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Scent, uniforms & print", "task": "Appoint the print partner", "why": "", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Design the House Menu card", "why": "Typeset to the House. Stationery, not a laminate.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Choose paper stock and print method", "why": "Uncoated and weighty. Letterpress or foil if budget allows. Every guest handles it.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Print menus and set the reprint cadence", "why": "Menus stain and dog-ear fast. Name who checks them weekly.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Design the menu holder or presentation method", "why": "Or decide it is presented by hand. Either works, but decide.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Design the House notepad and pen", "why": "On the table in every Conversation Room.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Design the Residence Advisor card", "why": "", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Design the take-home folder or box", "why": "Holds the plan, proposal, project information and contact. Last thing they touch.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Split on-demand from pre-printed collateral", "why": "Plan and proposal are customer-specific. Project information is not.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Buy an in-house printer that meets the standard", "why": "A beautiful folder with a streaky print inside undoes the whole thing.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Write the take-home assembly checklist", "why": "Who assembles it, when, and who checks before handover.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Scent, uniforms & print", "task": "Appoint the floral partner", "why": "", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Agree arrangement style and seasonal calendar", "why": "Restrained. Should read as a home, not a hotel lobby.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Choose and buy the vessels", "why": "Ceramics from the House palette. The vase matters as much as the stems.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Fix the delivery day and assign the water change", "why": "Twice weekly. Assign to a named role or it does not happen.", "step": "4. Train & open", "who": "House Manager"}, {"area": "Scent, uniforms & print", "task": "Open the Aesop trade account", "why": "Trade, not retail. Bulk pricing and scheduled refills.", "step": "2. Pick partners", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Decide bottles on the counter or refillable dispensers", "why": "Bottles look better. Dispensers cost less and go missing less. Pick one.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Scent, uniforms & print", "task": "Set the amenity restock schedule", "why": "", "step": "4. Train & open", "who": "House Manager"}, {"area": "Screens & app", "task": "Appoint the app development partner", "why": "", "step": "2. Pick partners", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Scope the full content set", "why": "Story, film, location, masterplan, tower, residences, plans, layouts, interiors, specs, amenities, imagery, availability, inventory, pricing.", "step": "2. Pick partners", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Design the iPad surface for one-handed use", "why": "The Advisor is sitting beside a customer, talking. No hunting through menus.", "step": "2. Pick partners", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Connect live inventory and pricing", "why": "Nothing damages trust faster than quoting a unit that sold last week.", "step": "3. Order & build", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Build the offline fallback", "why": "The wifi will drop during a closing conversation. Plan for it.", "step": "3. Order & build", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Make the project layer switchable in one tap", "why": "One House, many projects. Powai to Panvel should be instant.", "step": "3. Order & build", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Define the content update owner and cadence", "why": "", "step": "4. Train & open", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Appoint the AV integrator", "why": "", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Screens & app", "task": "Specify screen size and mounting height per room", "why": "", "step": "2. Pick partners", "who": "Projects Lead"}, {"area": "Screens & app", "task": "Design the screen idle state", "why": "Quiet when not in use. Not a screensaver, not a logo loop, not black.", "step": "3. Order & build", "who": "Brand Lead"}, {"area": "Screens & app", "task": "Check glare against real 3pm daylight", "why": "", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Screens & app", "task": "Set up wireless casting", "why": "No cables, no dongles.", "step": "3. Order & build", "who": "Projects Lead"}, {"area": "Screens & app", "task": "Define the guest memory fields", "why": "Project discussed, beverage, questions, who came along, what the next visit needs.", "step": "2. Pick partners", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Decide where guest notes are stored and who sees them", "why": "", "step": "2. Pick partners", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Assign logging owner and deadline", "why": "Advisor, same day. If it waits until tomorrow it does not get written.", "step": "4. Train & open", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Build the pre-visit briefing from guest notes", "why": "Gate, Host and Advisor read it before arrival. The whole reason for collecting it.", "step": "4. Train & open", "who": "Sales Lead"}, {"area": "Screens & app", "task": "Route beverage preference to the Barista before the guest sits", "why": "", "step": "4. Train & open", "who": "House Manager"}, {"area": "Screens & app", "task": "Run a privacy review on guest notes", "why": "We are storing information about people. Keep it minimal and professional.", "step": "3. Order & build", "who": "Leadership"}, {"area": "Screens & app", "task": "Train every Advisor until they can run it without looking down", "why": "", "step": "4. Train & open", "who": "Sales Lead"}];
+const PSTATUS = ["Not started","Talking to them","Shortlisted","Appointed"];
+const KEY="hg-exec-v1";
+
+let state = {done:{}, pstat:{}, pname:{}, step:"all", area:"all"};
+try{ const raw=localStorage.getItem(KEY); if(raw) state=Object.assign(state,JSON.parse(raw)); }catch(e){}
+function save(){
+  state.updated=new Date().toISOString();
+  try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){}
+  stamp();
+}
+function stamp(){
+  const el=document.getElementById('stamp'); if(!el) return;
+  el.textContent = state.updated
+    ? 'Last saved '+new Date(state.updated).toLocaleDateString(undefined,
+        {day:'numeric',month:'short',year:'numeric'})
+    : '';
+}
+
+/* ---------- partners ---------- */
+document.querySelectorAll('.pstatus').forEach(btn=>{
+  const i=btn.dataset.i;
+  const paint=()=>{
+    const s=state.pstat[i]||0;
+    btn.textContent=PSTATUS[s]; btn.dataset.s=s;
+    btn.closest('.pcard').classList.toggle('done',s===3);
+  };
+  btn.addEventListener('click',()=>{
+    state.pstat[i]=((state.pstat[i]||0)+1)%4; save(); paint();
+  });
+  paint();
+});
+document.querySelectorAll('.pinput').forEach(inp=>{
+  const i=inp.dataset.i;
+  inp.value=state.pname[i]||"";
+  inp.addEventListener('input',()=>{ state.pname[i]=inp.value; save(); });
+});
+
+/* ---------- checklist ---------- */
+const listEl=document.getElementById('list');
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function visible(){
+  return TASKS.map((t,i)=>({t,i})).filter(({t})=>
+    (state.step==="all"||t.step===state.step) &&
+    (state.area==="all"||t.area===state.area));
+}
+
+function render(){
+  const rows=visible();
+  if(!rows.length){ listEl.innerHTML='<p class="empty">Nothing here with those filters.</p>'; return; }
+  const groups={};
+  rows.forEach(({t,i})=>{ (groups[t.area]=groups[t.area]||[]).push({t,i}); });
+  let h="";
+  Object.keys(groups).forEach(area=>{
+    const g=groups[area];
+    const d=g.filter(({i})=>state.done[i]).length;
+    h+=`<div class="group"><div class="ghead"><span>${esc(area)}</span>
+        <span class="gcount">${d} / ${g.length}</span></div>`;
+    g.forEach(({t,i})=>{
+      h+=`<div class="item ${state.done[i]?'done':''}" data-i="${i}">
+        <div class="box"></div>
+        <div class="itext">
+          <div class="ititle">${esc(t.task)}</div>
+          ${t.why?`<div class="iwhy">${esc(t.why)}</div>`:''}
+          <div class="imeta">${esc(t.step)}${t.who?' · '+esc(t.who):''}</div>
+        </div></div>`;
+    });
+    h+="</div>";
+  });
+  listEl.innerHTML=h;
+  counts();
+}
+
+function counts(){
+  const done=TASKS.filter((t,i)=>state.done[i]).length;
+  document.getElementById('fill').style.width=(done/TASKS.length*100)+'%';
+  document.getElementById('pcount').textContent=done+' of '+TASKS.length+' done';
+  document.querySelectorAll('.scount').forEach(el=>{
+    const s=el.dataset.c;
+    const all=TASKS.filter(t=>t.step===s);
+    const d=all.filter((t)=>state.done[TASKS.indexOf(t)]).length;
+    el.textContent=d+' / '+all.length;
+  });
+}
+
+listEl.addEventListener('click',e=>{
+  const it=e.target.closest('.item'); if(!it) return;
+  const i=it.dataset.i;
+  state.done[i]=!state.done[i]; if(!state.done[i]) delete state.done[i];
+  save(); render();
+});
+
+document.querySelectorAll('.stepbtn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const s=b.dataset.step;
+    state.step=(state.step===s)?"all":s;
+    document.querySelectorAll('.stepbtn').forEach(x=>x.classList.toggle('on',x.dataset.step===state.step));
+    document.querySelectorAll('.stepdesc').forEach(x=>x.classList.toggle('on',x.dataset.step===state.step));
+    save(); render();
+  });
+});
+
+document.getElementById('chips').addEventListener('click',e=>{
+  const c=e.target.closest('.chip'); if(!c) return;
+  state.area=c.dataset.area;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c));
+  save(); render();
+});
+
+document.getElementById('save').addEventListener('click',()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='gallery-progress-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(a.href);
+});
+
+document.getElementById('load').addEventListener('click',()=>document.getElementById('file').click());
+document.getElementById('file').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      state.done=d.done||{}; state.pstat=d.pstat||{}; state.pname=d.pname||{};
+      state.updated=d.updated||null;
+      document.querySelectorAll('.pinput').forEach(x=>{ x.value=state.pname[x.dataset.i]||""; });
+      document.querySelectorAll('.pstatus').forEach(b=>{
+        const st=state.pstat[b.dataset.i]||0;
+        b.textContent=PSTATUS[st]; b.dataset.s=st;
+        b.closest('.pcard').classList.toggle('done',st===3);
+      });
+      save(); render();
+    }catch(err){ alert('That file could not be read.'); }
+  };
+  r.readAsText(f); e.target.value='';
+});
+
+document.getElementById('reset').addEventListener('click',()=>{
+  state.done={}; state.pstat={}; state.pname={};
+  document.querySelectorAll('.pinput').forEach(x=>x.value="");
+  document.querySelectorAll('.pstatus').forEach(b=>{
+    b.textContent=PSTATUS[0]; b.dataset.s=0; b.closest('.pcard').classList.remove('done');
+  });
+  save(); render();
+});
+
+/* restore filters */
+document.querySelectorAll('.stepbtn').forEach(x=>x.classList.toggle('on',x.dataset.step===state.step));
+document.querySelectorAll('.stepdesc').forEach(x=>x.classList.toggle('on',x.dataset.step===state.step));
+document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x.dataset.area===state.area));
+stamp();
+render();
+</script>
+</body>
+</html>
