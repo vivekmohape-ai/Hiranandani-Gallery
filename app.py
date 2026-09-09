@@ -7,10 +7,8 @@ import streamlit.components.v1 as components
 
 
 
-# Configuration
+# Page configuration
 
-
-MAX_ATTEMPTS = 5
 
 st.set_page_config(
     page_title="Hiranandani Gallery",
@@ -20,7 +18,14 @@ st.set_page_config(
 
 
 
-# Session state
+# Settings
+
+
+MAX_ATTEMPTS = 5
+
+
+
+# Initialize session state
 
 
 if "authenticated" not in st.session_state:
@@ -35,14 +40,14 @@ if "locked" not in st.session_state:
 
 
 # Password verification
-
-
 def verify_password(password: str) -> bool:
     entered_hash = hashlib.sha256(
         password.encode("utf-8")
     ).hexdigest()
 
-    stored_hash = st.secrets["APP_PASSWORD_HASH"]
+    stored_hash = hashlib.sha256(
+        st.secrets["APP_PASSWORD"].encode("utf-8")
+    ).hexdigest()
 
     return hmac.compare_digest(
         entered_hash,
@@ -62,11 +67,10 @@ def password_gate():
     st.title("Hiranandani Gallery")
     st.caption("Internal team access")
 
-    # Locked after too many failed attempts
     if st.session_state.locked:
         st.error(
-            "Access temporarily locked because of too many "
-            "incorrect password attempts."
+            "Too many incorrect attempts. "
+            "Access has been locked for this session."
         )
         return False
 
@@ -100,7 +104,7 @@ def password_gate():
 
                 st.error(
                     "Too many incorrect attempts. "
-                    "Access has been temporarily locked."
+                    "Access has been locked for this session."
                 )
 
             else:
@@ -119,14 +123,14 @@ def password_gate():
 
 if password_gate():
 
-    # Logout button
+    # Logout
     if st.button("Logout"):
         st.session_state.authenticated = False
         st.session_state.failed_attempts = 0
         st.session_state.locked = False
         st.rerun()
 
-    # Load existing HTML
+    # Load existing HTML application
     html_file = Path(__file__).parent / "index.html"
 
     html = html_file.read_text(
