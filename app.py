@@ -21,9 +21,9 @@ st.markdown(
     """
     <style>
 
-        /* ==============================
+        /* =========================================
            GLOBAL
-           ============================== */
+           ========================================= */
 
         .stApp {
             background: #F4EFE7;
@@ -49,31 +49,29 @@ st.markdown(
         }
 
 
-        /* ==============================
-           LOGIN SCREEN
-           ============================== */
+        /* =========================================
+           LOGIN AREA
+           ========================================= */
 
         .login-screen {
-            min-height: 100vh;
             width: 100%;
+            box-sizing: border-box;
 
             display: flex;
-            align-items: center;
             justify-content: center;
 
-            box-sizing: border-box;
-            padding: 40px 24px;
+            padding: 8vh 24px 0 24px;
         }
 
         .login-inner {
-            width: min(680px, 100%);
+            width: min(760px, 100%);
             text-align: center;
         }
 
 
-        /* ==============================
+        /* =========================================
            INTERNAL ACCESS
-           ============================== */
+           ========================================= */
 
         .login-kicker {
             font-family:
@@ -89,13 +87,13 @@ st.markdown(
 
             color: #80663D;
 
-            margin: 0 0 14px 0;
+            margin: 0;
         }
 
 
-        /* ==============================
+        /* =========================================
            DIVIDER
-           ============================== */
+           ========================================= */
 
         .login-rule {
             width: 56px;
@@ -103,43 +101,60 @@ st.markdown(
 
             background: #A68B5B;
 
-            margin: 0 auto 20px auto;
+            margin: 22px auto 24px auto;
         }
 
 
-        /* ==============================
+        /* =========================================
+           RESTRICTION TEXT
+           ========================================= */
+
+        .login-description {
+            font-family:
+                Optima,
+                "Optima Nova",
+                Candara,
+                "Gill Sans",
+                "Gill Sans MT",
+                "Segoe UI",
+                sans-serif;
+
+            font-size: 16px;
+            font-weight: 400;
+
+            line-height: 1.55;
+
+            color: #765F4F;
+
+            margin: 0 auto 30px auto;
+
+            text-align: center;
+        }
+
+
+        /* =========================================
            PASSWORD ROW
-           ============================== */
+           ========================================= */
 
         .password-row {
-            width: 100%;
-            max-width: 680px;
-
+            width: min(760px, 100%);
             margin: 0 auto;
 
             display: flex;
             align-items: flex-end;
-            gap: 10px;
-        }
 
-        .password-field {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .password-button {
-            flex: 0 0 auto;
-            padding-bottom: 0;
+            gap: 12px;
         }
 
 
-        /* ==============================
-           PASSWORD LABEL
-           ============================== */
+        /* =========================================
+           PASSWORD FIELD
+           ========================================= */
 
         div[data-testid="stTextInput"] {
             width: 100% !important;
             max-width: none !important;
+
             margin: 0 !important;
         }
 
@@ -158,11 +173,6 @@ st.markdown(
 
             margin-bottom: 5px !important;
         }
-
-
-        /* ==============================
-           PASSWORD INPUT
-           ============================== */
 
         div[data-testid="stTextInput"] input {
             width: 100% !important;
@@ -197,14 +207,21 @@ st.markdown(
         }
 
 
-        /* ==============================
+        /* =========================================
            ENTER BUTTON
-           ============================== */
+           ========================================= */
 
-        .password-button .stButton > button {
+        div[data-testid="stButton"] {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        div[data-testid="stButton"] button {
             height: 46px !important;
 
-            padding: 0 22px !important;
+            min-height: 46px !important;
+
+            padding: 0 24px !important;
 
             background: #4A3428 !important;
             color: #F4EFE7 !important;
@@ -222,22 +239,31 @@ st.markdown(
 
             box-shadow: none !important;
 
-            white-space: nowrap;
+            transition:
+                background 0.15s ease,
+                border-color 0.15s ease;
         }
 
-        .password-button .stButton > button:hover {
+        div[data-testid="stButton"] button:hover {
             background: #39271E !important;
             color: #F4EFE7 !important;
             border-color: #39271E !important;
         }
 
+        div[data-testid="stButton"] button:focus {
+            background: #4A3428 !important;
+            color: #F4EFE7 !important;
+            border-color: #4A3428 !important;
+            box-shadow: none !important;
+        }
 
-        /* ==============================
-           ERROR MESSAGE
-           ============================== */
+
+        /* =========================================
+           ERROR
+           ========================================= */
 
         div[data-testid="stAlert"] {
-            max-width: 680px;
+            width: min(760px, 100%);
 
             margin: 14px auto 0 auto;
 
@@ -247,13 +273,14 @@ st.markdown(
                 sans-serif;
 
             font-size: 13px;
+
             text-align: left;
         }
 
 
-        /* ==============================
+        /* =========================================
            LOGOUT
-           ============================== */
+           ========================================= */
 
         .logout-bar {
             width: 100%;
@@ -269,32 +296,32 @@ st.markdown(
             justify-content: flex-end;
         }
 
-        .logout-button .stButton > button {
+        .logout-button div[data-testid="stButton"] button {
+            height: 36px !important;
+            min-height: 36px !important;
+
+            padding: 0 16px !important;
+
             background: transparent !important;
             color: #6E5A4C !important;
 
             border: 1px solid #CFC2AE !important;
             border-radius: 3px !important;
 
-            font-family:
-                "Segoe UI",
-                Arial,
-                sans-serif;
-
             font-size: 12px !important;
             font-weight: 400 !important;
         }
 
-        .logout-button .stButton > button:hover {
+        .logout-button div[data-testid="stButton"] button:hover {
             background: #FBF8F3 !important;
             color: #3A2B21 !important;
             border-color: #80663D !important;
         }
 
 
-        /* ==============================
+        /* =========================================
            GALLERY IFRAME
-           ============================== */
+           ========================================= */
 
         div[data-testid="stIFrame"] {
             width: 100% !important;
@@ -311,13 +338,37 @@ st.markdown(
             display: block !important;
         }
 
+
+        /* =========================================
+           MOBILE
+           ========================================= */
+
+        @media (max-width: 700px) {
+
+            .login-screen {
+                padding: 7vh 20px 0 20px;
+            }
+
+            .login-description {
+                font-size: 15px;
+                margin-bottom: 24px;
+            }
+
+            .password-row {
+                display: block;
+            }
+
+            div[data-testid="stButton"] {
+                margin-top: 10px !important;
+            }
+
+        }
+
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-
-# Session state
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -351,7 +402,7 @@ def password_gate():
         return True
 
 
-    # Centered login screen
+    # Header
 
     st.html(
         """
@@ -363,6 +414,11 @@ def password_gate():
                 </div>
 
                 <div class="login-rule"></div>
+
+                <div class="login-description">
+                    This working document is restricted to the
+                    Hiranandani internal team.
+                </div>
 
             </div>
         </div>
@@ -380,16 +436,16 @@ def password_gate():
         return False
 
 
-    # Password + Enter button
+    # Password and Enter button
 
     left, center, right = st.columns(
-        [1, 6, 1]
+        [1, 8, 1]
     )
 
     with center:
 
         password_col, button_col = st.columns(
-            [5, 1],
+            [6, 1],
             gap="small"
         )
 
@@ -403,20 +459,10 @@ def password_gate():
 
         with button_col:
 
-            st.markdown(
-                '<div class="password-button">',
-                unsafe_allow_html=True,
-            )
-
             enter_clicked = st.button(
                 "Enter",
                 type="primary",
                 use_container_width=True,
-            )
-
-            st.markdown(
-                "</div>",
-                unsafe_allow_html=True,
             )
 
 
@@ -459,18 +505,18 @@ def password_gate():
     return False
 
 
-# Main application
-
 if password_gate():
 
-    # Logout
+    # Logout bar
 
     st.markdown(
         '<div class="logout-bar">',
         unsafe_allow_html=True,
     )
 
-    left, right = st.columns([20, 1])
+    left, right = st.columns(
+        [20, 1]
+    )
 
     with right:
 
@@ -501,7 +547,7 @@ if password_gate():
     )
 
 
-    # Existing index.html
+    # Existing Gallery
 
     html_file = Path(__file__).parent / "index.html"
 
