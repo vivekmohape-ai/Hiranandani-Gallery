@@ -20,7 +20,11 @@ MAX_ATTEMPTS = 5
 st.markdown(
     """
     <style>
-        /* Page */
+
+        /* ==============================
+           GLOBAL
+           ============================== */
+
         .stApp {
             background: #F4EFE7;
             color: #3A2B21;
@@ -44,27 +48,33 @@ st.markdown(
             display: none !important;
         }
 
-        /* Remove default vertical spacing */
-        div[data-testid="stVerticalBlock"] {
-            gap: 0.5rem;
-        }
 
-        /* Login wrapper */
+        /* ==============================
+           LOGIN SCREEN
+           ============================== */
+
         .login-screen {
             min-height: 100vh;
+            width: 100%;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             box-sizing: border-box;
             padding: 40px 24px;
         }
 
         .login-inner {
-            width: min(520px, 100%);
+            width: min(680px, 100%);
             text-align: center;
         }
 
-        /* Typography */
+
+        /* ==============================
+           INTERNAL ACCESS
+           ============================== */
+
         .login-kicker {
             font-family:
                 "Segoe UI",
@@ -73,64 +83,64 @@ st.markdown(
 
             font-size: 11px;
             font-weight: 400;
+
             letter-spacing: 0.22em;
             text-transform: uppercase;
 
             color: #80663D;
-            margin-bottom: 18px;
+
+            margin: 0 0 14px 0;
         }
 
-        .login-title {
-            font-family:
-                Optima,
-                "Optima Nova",
-                Candara,
-                "Gill Sans",
-                "Gill Sans MT",
-                "Segoe UI",
-                sans-serif;
 
-            font-size: clamp(36px, 5vw, 48px);
-            font-weight: 400;
-            line-height: 1.1;
-            letter-spacing: -0.5px;
-
-            color: #3A2B21;
-            margin: 0;
-        }
+        /* ==============================
+           DIVIDER
+           ============================== */
 
         .login-rule {
             width: 56px;
             height: 1px;
+
             background: #A68B5B;
 
-            margin: 26px auto 34px auto;
+            margin: 0 auto 20px auto;
         }
 
-        .login-description {
-            font-family:
-                Optima,
-                "Optima Nova",
-                Candara,
-                "Gill Sans",
-                "Gill Sans MT",
-                "Segoe UI",
-                sans-serif;
 
-            font-size: 15px;
-            font-weight: 400;
-            line-height: 1.6;
+        /* ==============================
+           PASSWORD ROW
+           ============================== */
 
-            color: #765F4F;
+        .password-row {
+            width: 100%;
+            max-width: 680px;
 
-            margin: 0 auto 34px auto;
+            margin: 0 auto;
+
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
         }
 
-        /* Password field */
+        .password-field {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .password-button {
+            flex: 0 0 auto;
+            padding-bottom: 0;
+        }
+
+
+        /* ==============================
+           PASSWORD LABEL
+           ============================== */
+
         div[data-testid="stTextInput"] {
             width: 100% !important;
-            max-width: 520px !important;
-            margin: 0 auto !important;
+            max-width: none !important;
+            margin: 0 !important;
         }
 
         div[data-testid="stTextInput"] label {
@@ -140,17 +150,25 @@ st.markdown(
                 sans-serif;
 
             color: #3A2B21 !important;
+
             font-size: 12px !important;
             font-weight: 400 !important;
 
             text-align: left !important;
+
+            margin-bottom: 5px !important;
         }
 
-        div[data-testid="stTextInput"] input {
-            box-sizing: border-box !important;
 
+        /* ==============================
+           PASSWORD INPUT
+           ============================== */
+
+        div[data-testid="stTextInput"] input {
             width: 100% !important;
-            height: 48px !important;
+            height: 46px !important;
+
+            box-sizing: border-box !important;
 
             background: #FBF8F3 !important;
             color: #3A2B21 !important;
@@ -170,57 +188,58 @@ st.markdown(
         }
 
         div[data-testid="stTextInput"] input:hover {
-            border-color: #B5A48C !important;
+            border-color: #A68B5B !important;
         }
 
         div[data-testid="stTextInput"] input:focus {
-            border-color: #80663D !important;
+            border-color: #4A3428 !important;
             box-shadow: none !important;
         }
 
-        /* Enter button */
-        .enter-row {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-top: 18px;
-        }
 
-        .enter-row .stButton > button {
-            min-width: 92px;
-            height: 42px;
+        /* ==============================
+           ENTER BUTTON
+           ============================== */
 
-            padding: 0 22px;
+        .password-button .stButton > button {
+            height: 46px !important;
 
-            background: #7C6035;
-            color: #FFFFFF;
+            padding: 0 22px !important;
 
-            border: 1px solid #7C6035;
-            border-radius: 3px;
+            background: #4A3428 !important;
+            color: #F4EFE7 !important;
+
+            border: 1px solid #4A3428 !important;
+            border-radius: 3px !important;
 
             font-family:
                 "Segoe UI",
                 Arial,
                 sans-serif;
 
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 13px !important;
+            font-weight: 500 !important;
 
-            box-shadow: none;
+            box-shadow: none !important;
+
+            white-space: nowrap;
         }
 
-        .enter-row .stButton > button:hover {
-            background: #6C522E;
-            color: #FFFFFF;
-            border-color: #6C522E;
+        .password-button .stButton > button:hover {
+            background: #39271E !important;
+            color: #F4EFE7 !important;
+            border-color: #39271E !important;
         }
 
-        /* Error */
+
+        /* ==============================
+           ERROR MESSAGE
+           ============================== */
+
         div[data-testid="stAlert"] {
-            width: 100%;
-            max-width: 520px;
+            max-width: 680px;
 
-            margin: 18px auto 0 auto;
+            margin: 14px auto 0 auto;
 
             font-family:
                 "Segoe UI",
@@ -231,14 +250,19 @@ st.markdown(
             text-align: left;
         }
 
-        /* Logout */
+
+        /* ==============================
+           LOGOUT
+           ============================== */
+
         .logout-bar {
             width: 100%;
             box-sizing: border-box;
 
-            padding: 12px 24px;
+            padding: 10px 24px;
 
             background: #F4EFE7;
+
             border-bottom: 1px solid #DDD1C0;
 
             display: flex;
@@ -246,44 +270,54 @@ st.markdown(
         }
 
         .logout-button .stButton > button {
-            background: transparent;
-            color: #6E5A4C;
+            background: transparent !important;
+            color: #6E5A4C !important;
 
-            border: 1px solid #CFC2AE;
-            border-radius: 3px;
+            border: 1px solid #CFC2AE !important;
+            border-radius: 3px !important;
 
             font-family:
                 "Segoe UI",
                 Arial,
                 sans-serif;
 
-            font-size: 12px;
-            font-weight: 400;
+            font-size: 12px !important;
+            font-weight: 400 !important;
         }
 
         .logout-button .stButton > button:hover {
-            background: #FBF8F3;
-            color: #3A2B21;
-            border-color: #80663D;
+            background: #FBF8F3 !important;
+            color: #3A2B21 !important;
+            border-color: #80663D !important;
         }
 
-        /* Gallery iframe */
+
+        /* ==============================
+           GALLERY IFRAME
+           ============================== */
+
         div[data-testid="stIFrame"] {
             width: 100% !important;
+
             margin: 0 !important;
             padding: 0 !important;
         }
 
         iframe {
             width: 100% !important;
+
             border: 0 !important;
+
             display: block !important;
         }
+
     </style>
     """,
     unsafe_allow_html=True,
 )
 
+
+# Session state
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -296,6 +330,7 @@ if "locked" not in st.session_state:
 
 
 def verify_password(password: str) -> bool:
+
     entered_hash = hashlib.sha256(
         password.encode("utf-8")
     ).hexdigest()
@@ -315,6 +350,9 @@ def password_gate():
     if st.session_state.authenticated:
         return True
 
+
+    # Centered login screen
+
     st.html(
         """
         <div class="login-screen">
@@ -324,21 +362,13 @@ def password_gate():
                     Internal Access
                 </div>
 
-                <div class="login-title">
-                    Enter password
-                </div>
-
                 <div class="login-rule"></div>
-
-                <div class="login-description">
-                    This working document is restricted to
-                    the Hiranandani internal team.
-                </div>
 
             </div>
         </div>
         """
     )
+
 
     if st.session_state.locked:
 
@@ -349,66 +379,92 @@ def password_gate():
 
         return False
 
-    password = st.text_input(
-        "Password",
-        type="password",
-        autocomplete="off",
+
+    # Password + Enter button
+
+    left, center, right = st.columns(
+        [1, 6, 1]
     )
 
-    st.markdown(
-        '<div class="enter-row">',
-        unsafe_allow_html=True,
-    )
+    with center:
 
-    if st.button(
-        "Enter",
-        type="primary",
-    ):
+        password_col, button_col = st.columns(
+            [5, 1],
+            gap="small"
+        )
 
-        if verify_password(password):
+        with password_col:
 
-            st.session_state.authenticated = True
-            st.session_state.failed_attempts = 0
-            st.session_state.locked = False
-
-            st.rerun()
-
-        else:
-
-            st.session_state.failed_attempts += 1
-
-            remaining = (
-                MAX_ATTEMPTS
-                - st.session_state.failed_attempts
+            password = st.text_input(
+                "Password",
+                type="password",
+                autocomplete="off",
             )
 
-            if remaining <= 0:
+        with button_col:
 
-                st.session_state.locked = True
+            st.markdown(
+                '<div class="password-button">',
+                unsafe_allow_html=True,
+            )
 
-                st.error(
-                    "Too many incorrect attempts. "
-                    "Access has been locked for this session."
-                )
+            enter_clicked = st.button(
+                "Enter",
+                type="primary",
+                use_container_width=True,
+            )
+
+            st.markdown(
+                "</div>",
+                unsafe_allow_html=True,
+            )
+
+
+        if enter_clicked:
+
+            if verify_password(password):
+
+                st.session_state.authenticated = True
+                st.session_state.failed_attempts = 0
+                st.session_state.locked = False
+
+                st.rerun()
 
             else:
 
-                st.error(
-                    f"Incorrect password. "
-                    f"{remaining} attempt(s) remaining."
+                st.session_state.failed_attempts += 1
+
+                remaining = (
+                    MAX_ATTEMPTS
+                    - st.session_state.failed_attempts
                 )
 
-    st.markdown(
-        "</div>",
-        unsafe_allow_html=True,
-    )
+                if remaining <= 0:
+
+                    st.session_state.locked = True
+
+                    st.error(
+                        "Too many incorrect attempts. "
+                        "Access has been locked for this session."
+                    )
+
+                else:
+
+                    st.error(
+                        f"Incorrect password. "
+                        f"{remaining} attempt(s) remaining."
+                    )
+
 
     return False
 
 
+# Main application
+
 if password_gate():
 
     # Logout
+
     st.markdown(
         '<div class="logout-bar">',
         unsafe_allow_html=True,
@@ -444,7 +500,9 @@ if password_gate():
         unsafe_allow_html=True,
     )
 
+
     # Existing index.html
+
     html_file = Path(__file__).parent / "index.html"
 
     if not html_file.exists():
@@ -455,9 +513,11 @@ if password_gate():
 
         st.stop()
 
+
     html = html_file.read_text(
         encoding="utf-8"
     )
+
 
     components.html(
         html,
