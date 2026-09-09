@@ -13,14 +13,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-
 MAX_ATTEMPTS = 5
 
 
 st.markdown(
     """
     <style>
-
         .stApp {
             background: #F4EFE7;
             color: #3A2B21;
@@ -36,24 +34,17 @@ st.markdown(
             background: #F4EFE7 !important;
         }
 
-        footer {
-            display: none !important;
-        }
-
+        footer,
         section[data-testid="stSidebar"] {
             display: none !important;
         }
 
-
-        /* Login */
-
+        /* Login positioning */
         .login-screen {
             width: 100%;
             box-sizing: border-box;
-
             display: flex;
             justify-content: center;
-
             padding: 8vh 24px 0 24px;
         }
 
@@ -62,9 +53,7 @@ st.markdown(
             text-align: center;
         }
 
-
         /* Internal access */
-
         .login-kicker {
             font-family:
                 "Segoe UI",
@@ -73,34 +62,26 @@ st.markdown(
 
             font-size: 11px;
             font-weight: 400;
-
             letter-spacing: 0.22em;
             text-transform: uppercase;
 
             color: #7A5F32;
-
             margin: 0;
         }
 
-
-        /* Gold rule */
-
+        /* Divider */
         .login-rule {
             width: 56px;
             height: 1px;
-
             background: #A68B5B;
-
             margin: 22px auto 24px auto;
         }
 
-
         /* Description */
-
         .login-description {
             font-family:
                 Optima,
-                "Optima nova",
+                "Optima Nova",
                 Candara,
                 "Gill Sans",
                 "Gill Sans MT",
@@ -109,50 +90,39 @@ st.markdown(
 
             font-size: 16px;
             font-weight: 300;
-
             line-height: 1.55;
 
             color: #6E5A4C;
 
             margin: 0 auto 26px auto;
-
             text-align: center;
         }
 
-
-        /* Password input */
-
+        /* Password field */
         div[data-testid="stTextInput"] {
             width: 100% !important;
             max-width: none !important;
-
             margin: 0 !important;
             padding: 0 !important;
         }
 
         div[data-testid="stTextInput"] label {
             font-family:
-                "SF Pro Text",
-                "SF Pro Display",
-                -apple-system,
-                BlinkMacSystemFont,
                 "Segoe UI",
+                Arial,
                 sans-serif;
 
             color: #3A2B21 !important;
-
             font-size: 13px !important;
             font-weight: 400 !important;
 
             text-align: left !important;
-
             margin-bottom: 5px !important;
         }
 
         div[data-testid="stTextInput"] input {
             width: 100% !important;
             height: 46px !important;
-
             box-sizing: border-box !important;
 
             background: #FBF8F3 !important;
@@ -162,11 +132,8 @@ st.markdown(
             border-radius: 3px !important;
 
             font-family:
-                "SF Pro Text",
-                "SF Pro Display",
-                -apple-system,
-                BlinkMacSystemFont,
                 "Segoe UI",
+                Arial,
                 sans-serif;
 
             font-size: 15px !important;
@@ -184,9 +151,7 @@ st.markdown(
             box-shadow: 0 0 0 1px #4A3428 !important;
         }
 
-
-        /* Enter button alignment */
-
+        /* Enter button */
         .enter-button-wrap {
             padding-top: 28px !important;
         }
@@ -198,66 +163,75 @@ st.markdown(
 
         .enter-button-wrap div[data-testid="stButton"] > button {
             width: 100% !important;
-
             height: 46px !important;
             min-height: 46px !important;
 
             background: #4A3428 !important;
-            color: #F4EFE7 !important;
+            color: #FFFFFF !important;
 
             border: 1px solid #4A3428 !important;
             border-radius: 3px !important;
 
             font-family:
-                "SF Pro Text",
-                "SF Pro Display",
-                -apple-system,
-                BlinkMacSystemFont,
                 "Segoe UI",
+                Arial,
                 sans-serif;
 
             font-size: 13px !important;
-            font-weight: 400 !important;
+            font-weight: 500 !important;
 
             box-shadow: none !important;
+            text-shadow: none !important;
+        }
+
+        /* Force Streamlit button text to white */
+        .enter-button-wrap div[data-testid="stButton"] > button p,
+        .enter-button-wrap div[data-testid="stButton"] > button span,
+        .enter-button-wrap div[data-testid="stButton"] > button div {
+            color: #FFFFFF !important;
         }
 
         .enter-button-wrap div[data-testid="stButton"] > button:hover {
             background: #39271E !important;
-            color: #F4EFE7 !important;
+            color: #FFFFFF !important;
             border-color: #39271E !important;
         }
 
-        .enter-button-wrap div[data-testid="stButton"] > button:active,
-        .enter-button-wrap div[data-testid="stButton"] > button:focus {
+        .enter-button-wrap div[data-testid="stButton"] > button:hover p,
+        .enter-button-wrap div[data-testid="stButton"] > button:hover span,
+        .enter-button-wrap div[data-testid="stButton"] > button:hover div {
+            color: #FFFFFF !important;
+        }
+
+        .enter-button-wrap div[data-testid="stButton"] > button:focus,
+        .enter-button-wrap div[data-testid="stButton"] > button:active {
             background: #4A3428 !important;
-            color: #F4EFE7 !important;
+            color: #FFFFFF !important;
             border-color: #4A3428 !important;
             box-shadow: none !important;
         }
 
+        .enter-button-wrap div[data-testid="stButton"] > button:focus p,
+        .enter-button-wrap div[data-testid="stButton"] > button:focus span,
+        .enter-button-wrap div[data-testid="stButton"] > button:active p,
+        .enter-button-wrap div[data-testid="stButton"] > button:active span {
+            color: #FFFFFF !important;
+        }
 
         /* Error */
-
         div[data-testid="stAlert"] {
             width: min(760px, 100%);
-
             margin: 14px auto 0 auto;
 
             font-family:
-                "SF Pro Text",
-                "SF Pro Display",
-                -apple-system,
-                BlinkMacSystemFont,
                 "Segoe UI",
+                Arial,
                 sans-serif;
 
             font-size: 13px;
         }
 
-
         /* Logout */
-
         .logout-bar {
             width: 100%;
             box-sizing: border-box;
@@ -265,7 +239,6 @@ st.markdown(
             padding: 10px 24px;
 
             background: #F4EFE7;
-
             border-bottom: 1px solid #E0D6C6;
 
             display: flex;
@@ -289,11 +262,8 @@ st.markdown(
             border-radius: 3px !important;
 
             font-family:
-                "SF Pro Text",
-                "SF Pro Display",
-                -apple-system,
-                BlinkMacSystemFont,
                 "Segoe UI",
+                Arial,
                 sans-serif;
 
             font-size: 12px !important;
@@ -306,9 +276,7 @@ st.markdown(
             border-color: #A68B5B !important;
         }
 
-
         /* Gallery */
-
         div[data-testid="stIFrame"] {
             width: 100% !important;
             margin: 0 !important;
@@ -321,11 +289,8 @@ st.markdown(
             display: block !important;
         }
 
-
         /* Mobile */
-
         @media (max-width: 700px) {
-
             .login-screen {
                 padding: 7vh 20px 0 20px;
             }
@@ -333,9 +298,7 @@ st.markdown(
             .enter-button-wrap {
                 padding-top: 10px !important;
             }
-
         }
-
     </style>
     """,
     unsafe_allow_html=True,
@@ -353,7 +316,6 @@ if "locked" not in st.session_state:
 
 
 def verify_password(password: str) -> bool:
-
     entered_hash = hashlib.sha256(
         password.encode("utf-8")
     ).hexdigest()
@@ -372,7 +334,6 @@ def password_gate():
 
     if st.session_state.authenticated:
         return True
-
 
     st.html(
         """
@@ -395,7 +356,6 @@ def password_gate():
         """
     )
 
-
     if st.session_state.locked:
 
         st.error(
@@ -404,9 +364,6 @@ def password_gate():
         )
 
         return False
-
-
-    # Password + Enter
 
     left, center, right = st.columns(
         [1, 8, 1]
@@ -445,7 +402,6 @@ def password_gate():
                 unsafe_allow_html=True,
             )
 
-
         if enter_clicked:
 
             if verify_password(password):
@@ -481,7 +437,6 @@ def password_gate():
                         f"{remaining} attempt(s) remaining."
                     )
 
-
     return False
 
 
@@ -492,9 +447,7 @@ if password_gate():
         unsafe_allow_html=True,
     )
 
-    left, right = st.columns(
-        [20, 1]
-    )
+    left, right = st.columns([20, 1])
 
     with right:
 
@@ -525,7 +478,6 @@ if password_gate():
         unsafe_allow_html=True,
     )
 
-
     html_file = Path(__file__).parent / "index.html"
 
     if not html_file.exists():
@@ -536,11 +488,9 @@ if password_gate():
 
         st.stop()
 
-
     html = html_file.read_text(
         encoding="utf-8"
     )
-
 
     components.html(
         html,
