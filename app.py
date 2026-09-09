@@ -21,10 +21,6 @@ st.markdown(
     """
     <style>
 
-        /* =========================================
-           GLOBAL
-           ========================================= */
-
         .stApp {
             background: #F4EFE7;
             color: #3A2B21;
@@ -49,9 +45,7 @@ st.markdown(
         }
 
 
-        /* =========================================
-           LOGIN AREA
-           ========================================= */
+        /* Login area */
 
         .login-screen {
             width: 100%;
@@ -69,9 +63,7 @@ st.markdown(
         }
 
 
-        /* =========================================
-           INTERNAL ACCESS
-           ========================================= */
+        /* Internal access */
 
         .login-kicker {
             font-family:
@@ -91,9 +83,7 @@ st.markdown(
         }
 
 
-        /* =========================================
-           DIVIDER
-           ========================================= */
+        /* Divider */
 
         .login-rule {
             width: 56px;
@@ -105,9 +95,7 @@ st.markdown(
         }
 
 
-        /* =========================================
-           RESTRICTION TEXT
-           ========================================= */
+        /* Description */
 
         .login-description {
             font-family:
@@ -126,30 +114,13 @@ st.markdown(
 
             color: #765F4F;
 
-            margin: 0 auto 30px auto;
+            margin: 0 auto 28px auto;
 
             text-align: center;
         }
 
 
-        /* =========================================
-           PASSWORD ROW
-           ========================================= */
-
-        .password-row {
-            width: min(760px, 100%);
-            margin: 0 auto;
-
-            display: flex;
-            align-items: flex-end;
-
-            gap: 12px;
-        }
-
-
-        /* =========================================
-           PASSWORD FIELD
-           ========================================= */
+        /* Password input */
 
         div[data-testid="stTextInput"] {
             width: 100% !important;
@@ -207,18 +178,29 @@ st.markdown(
         }
 
 
-        /* =========================================
-           ENTER BUTTON
-           ========================================= */
+        /* Password row */
 
-        div[data-testid="stButton"] {
+        .password-row {
+            width: 100%;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+
+        /* Enter button */
+
+        .enter-button {
+            padding-top: 24px;
+        }
+
+        .enter-button div[data-testid="stButton"] {
             margin: 0 !important;
             padding: 0 !important;
         }
 
-        div[data-testid="stButton"] button {
+        .enter-button div[data-testid="stButton"] button {
             height: 46px !important;
-
             min-height: 46px !important;
 
             padding: 0 24px !important;
@@ -239,18 +221,16 @@ st.markdown(
 
             box-shadow: none !important;
 
-            transition:
-                background 0.15s ease,
-                border-color 0.15s ease;
+            white-space: nowrap;
         }
 
-        div[data-testid="stButton"] button:hover {
+        .enter-button div[data-testid="stButton"] button:hover {
             background: #39271E !important;
             color: #F4EFE7 !important;
             border-color: #39271E !important;
         }
 
-        div[data-testid="stButton"] button:focus {
+        .enter-button div[data-testid="stButton"] button:focus {
             background: #4A3428 !important;
             color: #F4EFE7 !important;
             border-color: #4A3428 !important;
@@ -258,9 +238,7 @@ st.markdown(
         }
 
 
-        /* =========================================
-           ERROR
-           ========================================= */
+        /* Error */
 
         div[data-testid="stAlert"] {
             width: min(760px, 100%);
@@ -278,9 +256,7 @@ st.markdown(
         }
 
 
-        /* =========================================
-           LOGOUT
-           ========================================= */
+        /* Logout */
 
         .logout-bar {
             width: 100%;
@@ -319,9 +295,7 @@ st.markdown(
         }
 
 
-        /* =========================================
-           GALLERY IFRAME
-           ========================================= */
+        /* Gallery */
 
         div[data-testid="stIFrame"] {
             width: 100% !important;
@@ -332,16 +306,12 @@ st.markdown(
 
         iframe {
             width: 100% !important;
-
             border: 0 !important;
-
             display: block !important;
         }
 
 
-        /* =========================================
-           MOBILE
-           ========================================= */
+        /* Mobile */
 
         @media (max-width: 700px) {
 
@@ -349,17 +319,12 @@ st.markdown(
                 padding: 7vh 20px 0 20px;
             }
 
-            .login-description {
-                font-size: 15px;
-                margin-bottom: 24px;
-            }
-
             .password-row {
                 display: block;
             }
 
-            div[data-testid="stButton"] {
-                margin-top: 10px !important;
+            .enter-button {
+                padding-top: 10px;
             }
 
         }
@@ -402,8 +367,6 @@ def password_gate():
         return True
 
 
-    # Header
-
     st.html(
         """
         <div class="login-screen">
@@ -436,7 +399,7 @@ def password_gate():
         return False
 
 
-    # Password and Enter button
+    # Password + button
 
     left, center, right = st.columns(
         [1, 8, 1]
@@ -459,10 +422,20 @@ def password_gate():
 
         with button_col:
 
+            st.markdown(
+                '<div class="enter-button">',
+                unsafe_allow_html=True,
+            )
+
             enter_clicked = st.button(
                 "Enter",
                 type="primary",
                 use_container_width=True,
+            )
+
+            st.markdown(
+                "</div>",
+                unsafe_allow_html=True,
             )
 
 
@@ -507,8 +480,6 @@ def password_gate():
 
 if password_gate():
 
-    # Logout bar
-
     st.markdown(
         '<div class="logout-bar">',
         unsafe_allow_html=True,
@@ -546,8 +517,6 @@ if password_gate():
         unsafe_allow_html=True,
     )
 
-
-    # Existing Gallery
 
     html_file = Path(__file__).parent / "index.html"
 
