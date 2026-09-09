@@ -6,10 +6,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 
-# ============================================================
-# PAGE CONFIG
-# ============================================================
-
 st.set_page_config(
     page_title="Hiranandani Gallery",
     page_icon="HG",
@@ -18,91 +14,325 @@ st.set_page_config(
 )
 
 
-# ============================================================
-# SETTINGS
-# ============================================================
-
 MAX_ATTEMPTS = 5
 
-
-# ============================================================
-# STREAMLIT UI — BLACK BACKGROUND
-# ============================================================
 
 st.markdown(
     """
     <style>
 
-    /* Entire Streamlit application */
+    /* =====================================================
+       GLOBAL STREAMLIT STYLING
+       ===================================================== */
+
     .stApp {
-        background: #000000;
-        color: #FFFFFF;
+        background: #F4EFE7;
+        color: #3A2B21;
     }
 
-    /* Remove default Streamlit top spacing */
     .block-container {
-        padding-top: 1.5rem;
-        padding-bottom: 0rem;
         max-width: 100%;
+        padding: 0;
     }
 
-    /* Hide Streamlit header */
     header[data-testid="stHeader"] {
-        background: #000000;
+        background: #4A3428;
     }
 
-    /* Hide footer */
     footer {
-        visibility: hidden;
+        display: none;
     }
 
-    /* Hide sidebar */
+    /* Hide Streamlit sidebar */
     section[data-testid="stSidebar"] {
         display: none;
     }
 
-    /* Password input */
+
+    /* =====================================================
+       LOGIN HEADER
+       ===================================================== */
+
+    .login-header {
+        background: #4A3428;
+        color: #F4EFE7;
+        padding: 64px 7vw 56px 7vw;
+    }
+
+    .login-header h1 {
+        font-family:
+            Optima,
+            "Optima Nova",
+            Candara,
+            "Gill Sans",
+            "Gill Sans MT",
+            "Segoe UI",
+            sans-serif;
+
+        font-size: clamp(36px, 5vw, 52px);
+        font-weight: 400;
+        line-height: 1.12;
+        letter-spacing: -0.5px;
+
+        margin: 0 0 18px 0;
+        color: #F4EFE7;
+    }
+
+    .login-header p {
+        font-family:
+            "SF Pro Text",
+            "SF Pro Display",
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+
+        font-size: 16px;
+        font-weight: 300;
+        line-height: 1.6;
+
+        max-width: 560px;
+        margin: 0;
+
+        color: #F4EFE7;
+        opacity: 0.88;
+    }
+
+    .login-rule {
+        width: 56px;
+        height: 1px;
+        background: #A68B5B;
+        margin-top: 26px;
+    }
+
+
+    /* =====================================================
+       LOGIN CONTENT
+       ===================================================== */
+
+    .login-content {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 52px 28px 80px 28px;
+    }
+
+    .login-kick {
+        font-family:
+            "SF Pro Text",
+            "SF Pro Display",
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+
+        font-size: 11px;
+        font-weight: 400;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+
+        color: #7A5F32;
+        margin-bottom: 12px;
+    }
+
+    .login-title {
+        font-family:
+            Optima,
+            "Optima Nova",
+            Candara,
+            "Gill Sans",
+            "Gill Sans MT",
+            "Segoe UI",
+            sans-serif;
+
+        font-size: 34px;
+        font-weight: 400;
+        line-height: 1.2;
+
+        color: #3A2B21;
+        margin-bottom: 12px;
+    }
+
+    .login-description {
+        font-family:
+            "SF Pro Text",
+            "SF Pro Display",
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+
+        font-size: 16px;
+        font-weight: 300;
+        line-height: 1.6;
+
+        color: #6E5A4C;
+        max-width: 640px;
+
+        margin-bottom: 32px;
+    }
+
+
+    /* =====================================================
+       PASSWORD INPUT
+       ===================================================== */
+
+    div[data-testid="stTextInput"] {
+        max-width: 560px;
+    }
+
     div[data-testid="stTextInput"] label {
-        color: #FFFFFF !important;
+        font-family:
+            "SF Pro Text",
+            "SF Pro Display",
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+
+        color: #3A2B21 !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
     }
 
     div[data-testid="stTextInput"] input {
-        background: #111111 !important;
-        color: #FFFFFF !important;
-        border: 1px solid #444444 !important;
-        border-radius: 6px !important;
-    }
+        background: #FBF8F3 !important;
+        color: #3A2B21 !important;
 
-    div[data-testid="stTextInput"] input:focus {
-        border-color: #FFFFFF !important;
+        border: 1px solid #E0D6C6 !important;
+        border-radius: 4px !important;
+
+        font-family:
+            "SF Pro Text",
+            "SF Pro Display",
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+
+        font-size: 15px !important;
+        font-weight: 300 !important;
+
+        height: 48px !important;
         box-shadow: none !important;
     }
 
-    /* Buttons */
+    div[data-testid="stTextInput"] input:focus {
+        border-color: #A68B5B !important;
+        box-shadow: none !important;
+    }
+
+
+    /* =====================================================
+       BUTTONS
+       ===================================================== */
+
     .stButton > button {
-        border-radius: 6px;
-        border: 1px solid #444444;
-        background: #111111;
-        color: #FFFFFF;
-        padding: 0.5rem 1.2rem;
+        font-family:
+            "SF Pro Text",
+            "SF Pro Display",
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+
+        border-radius: 4px;
+
+        background: transparent;
+        color: #6E5A4C;
+
+        border: 1px solid #E0D6C6;
+
+        min-height: 38px;
+        padding: 6px 16px;
+
+        transition: 0.18s ease;
     }
 
     .stButton > button:hover {
-        border-color: #FFFFFF;
-        background: #1A1A1A;
+        border-color: #A68B5B;
+        color: #3A2B21;
+        background: #FBF8F3;
+    }
+
+    /* Enter button */
+
+    .enter-button .stButton > button {
+        background: #7E6234;
         color: #FFFFFF;
+
+        border-color: #7E6234;
+
+        min-height: 42px;
+        padding: 7px 22px;
     }
 
-    /* Primary Enter button */
-    .stButton > button[kind="primary"] {
-        background: #FFFFFF;
-        color: #000000;
-        border: 1px solid #FFFFFF;
+    .enter-button .stButton > button:hover {
+        background: #6E552D;
+        color: #FFFFFF;
+        border-color: #6E552D;
     }
 
-    .stButton > button[kind="primary"]:hover {
-        background: #EAEAEA;
-        color: #000000;
+
+    /* =====================================================
+       ERROR MESSAGE
+       ===================================================== */
+
+    div[data-testid="stAlert"] {
+        max-width: 560px;
+        font-family:
+            "SF Pro Text",
+            "SF Pro Display",
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+
+        font-size: 13px;
+    }
+
+
+    /* =====================================================
+       LOGOUT
+       ===================================================== */
+
+    .logout-bar {
+        max-width: 100%;
+        padding: 14px 28px;
+        border-bottom: 1px solid #E0D6C6;
+        background: #F4EFE7;
+    }
+
+    .logout-button .stButton > button {
+        background: transparent;
+        color: #6E5A4C;
+        border: 1px solid #E0D6C6;
+    }
+
+    .logout-button .stButton > button:hover {
+        background: #FBF8F3;
+        border-color: #A68B5B;
+        color: #3A2B21;
+    }
+
+
+    /* =====================================================
+       EMBEDDED GALLERY
+       ===================================================== */
+
+    div[data-testid="stIFrame"] {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    iframe {
+        width: 100% !important;
+        border: 0 !important;
+        display: block !important;
     }
 
     </style>
@@ -110,10 +340,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
-# ============================================================
-# SESSION STATE
-# ============================================================
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -125,17 +351,7 @@ if "locked" not in st.session_state:
     st.session_state.locked = False
 
 
-# ============================================================
-# PASSWORD VERIFICATION
-# ============================================================
-
 def verify_password(password: str) -> bool:
-    """
-    Compare the entered password against the password
-    stored in Streamlit Secrets.
-
-    The plaintext password is never stored in app.py.
-    """
 
     entered_hash = hashlib.sha256(
         password.encode("utf-8")
@@ -151,55 +367,72 @@ def verify_password(password: str) -> bool:
     )
 
 
-# ============================================================
-# PASSWORD SCREEN
-# ============================================================
-
 def password_gate():
 
     if st.session_state.authenticated:
         return True
 
-    # Center the login area
-    left, center, right = st.columns([1, 2, 1])
+    # Header matching the existing Gallery
+    st.markdown(
+        """
+        <div class="login-header">
 
-    with center:
+            <h1>
+                Hiranandani Gallery<br>
+                How we build it
+            </h1>
 
-        st.markdown(
-            """
-            <div style="
-                margin-top: 15vh;
-                margin-bottom: 30px;
-            ">
-                <h1 style="
-                    color: #FFFFFF;
-                    font-size: 42px;
-                    font-weight: 500;
-                    margin-bottom: 8px;
-                ">
-                    Hiranandani Gallery
-                </h1>
+            <p>
+                Five steps, in order. Pick the partners first,
+                then work the list. Everything you tick is
+                saved on this device.
+            </p>
 
-                <p style="
-                    color: #999999;
-                    font-size: 15px;
-                    margin-top: 0;
-                ">
-                    Internal team access
-                </p>
+            <div class="login-rule"></div>
+
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Login content
+    st.markdown(
+        """
+        <div class="login-content">
+
+            <div class="login-kick">
+                Internal access
             </div>
-            """,
-            unsafe_allow_html=True,
+
+            <div class="login-title">
+                Enter password
+            </div>
+
+            <div class="login-description">
+                This working document is restricted to the
+                Hiranandani internal team.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if st.session_state.locked:
+
+        st.error(
+            "Too many incorrect attempts. "
+            "Access has been locked for this session."
         )
 
-        if st.session_state.locked:
+        return False
 
-            st.error(
-                "Too many incorrect attempts. "
-                "Access has been locked for this session."
-            )
+    # Keep the actual input aligned with the content width
+    left, field, right = st.columns(
+        [1, 3, 1]
+    )
 
-            return False
+    with field:
 
         password = st.text_input(
             "Password",
@@ -208,16 +441,21 @@ def password_gate():
             label_visibility="visible",
         )
 
+        st.markdown(
+            '<div class="enter-button">',
+            unsafe_allow_html=True,
+        )
+
         if st.button(
             "Enter",
             type="primary",
-            use_container_width=False,
         ):
 
             if verify_password(password):
 
                 st.session_state.authenticated = True
                 st.session_state.failed_attempts = 0
+                st.session_state.locked = False
 
                 st.rerun()
 
@@ -246,22 +484,32 @@ def password_gate():
                         f"{remaining} attempt(s) remaining."
                     )
 
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
     return False
 
 
-# ============================================================
-# MAIN APPLICATION
-# ============================================================
-
 if password_gate():
 
-    # --------------------------------------------------------
-    # Top control bar
-    # --------------------------------------------------------
+    # Logout bar
+    st.markdown(
+        '<div class="logout-bar">',
+        unsafe_allow_html=True,
+    )
 
-    top_left, top_right = st.columns([8, 1])
+    logout_left, logout_right = st.columns(
+        [20, 1]
+    )
 
-    with top_right:
+    with logout_right:
+
+        st.markdown(
+            '<div class="logout-button">',
+            unsafe_allow_html=True,
+        )
 
         if st.button(
             "Logout",
@@ -274,18 +522,23 @@ if password_gate():
 
             st.rerun()
 
-    # --------------------------------------------------------
-    # Load existing HTML
-    # --------------------------------------------------------
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True,
+        )
 
+    st.markdown(
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
+    # Load the existing Gallery
     html_file = Path(__file__).parent / "index.html"
 
     if not html_file.exists():
 
         st.error(
-            "index.html could not be found. "
-            "Make sure it is in the same GitHub repository "
-            "as app.py."
+            "index.html could not be found."
         )
 
         st.stop()
@@ -294,12 +547,9 @@ if password_gate():
         encoding="utf-8"
     )
 
-    # --------------------------------------------------------
-    # Display existing Gallery
-    # --------------------------------------------------------
-
+    # Large viewing area for the existing Gallery
     components.html(
         html,
-        height=5000,
+        height=1400,
         scrolling=True,
     )
