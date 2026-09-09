@@ -33,7 +33,7 @@ st.markdown(
         }
 
         header[data-testid="stHeader"] {
-            background: #F4EFE7;
+            background: #F4EFE7 !important;
         }
 
         footer {
@@ -45,7 +45,7 @@ st.markdown(
         }
 
 
-        /* Login area */
+        /* Login */
 
         .login-screen {
             width: 100%;
@@ -77,13 +77,13 @@ st.markdown(
             letter-spacing: 0.22em;
             text-transform: uppercase;
 
-            color: #80663D;
+            color: #7A5F32;
 
             margin: 0;
         }
 
 
-        /* Divider */
+        /* Gold rule */
 
         .login-rule {
             width: 56px;
@@ -100,7 +100,7 @@ st.markdown(
         .login-description {
             font-family:
                 Optima,
-                "Optima Nova",
+                "Optima nova",
                 Candara,
                 "Gill Sans",
                 "Gill Sans MT",
@@ -108,13 +108,13 @@ st.markdown(
                 sans-serif;
 
             font-size: 16px;
-            font-weight: 400;
+            font-weight: 300;
 
             line-height: 1.55;
 
-            color: #765F4F;
+            color: #6E5A4C;
 
-            margin: 0 auto 28px auto;
+            margin: 0 auto 26px auto;
 
             text-align: center;
         }
@@ -127,17 +127,21 @@ st.markdown(
             max-width: none !important;
 
             margin: 0 !important;
+            padding: 0 !important;
         }
 
         div[data-testid="stTextInput"] label {
             font-family:
+                "SF Pro Text",
+                "SF Pro Display",
+                -apple-system,
+                BlinkMacSystemFont,
                 "Segoe UI",
-                Arial,
                 sans-serif;
 
             color: #3A2B21 !important;
 
-            font-size: 12px !important;
+            font-size: 13px !important;
             font-weight: 400 !important;
 
             text-align: left !important;
@@ -158,8 +162,11 @@ st.markdown(
             border-radius: 3px !important;
 
             font-family:
+                "SF Pro Text",
+                "SF Pro Display",
+                -apple-system,
+                BlinkMacSystemFont,
                 "Segoe UI",
-                Arial,
                 sans-serif;
 
             font-size: 15px !important;
@@ -174,36 +181,26 @@ st.markdown(
 
         div[data-testid="stTextInput"] input:focus {
             border-color: #4A3428 !important;
-            box-shadow: none !important;
+            box-shadow: 0 0 0 1px #4A3428 !important;
         }
 
 
-        /* Password row */
+        /* Enter button alignment */
 
-        .password-row {
-            width: 100%;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
+        .enter-button-wrap {
+            padding-top: 28px !important;
         }
 
-
-        /* Enter button */
-
-        .enter-button {
-            padding-top: 24px;
-        }
-
-        .enter-button div[data-testid="stButton"] {
+        .enter-button-wrap div[data-testid="stButton"] {
             margin: 0 !important;
             padding: 0 !important;
         }
 
-        .enter-button div[data-testid="stButton"] button {
+        .enter-button-wrap div[data-testid="stButton"] > button {
+            width: 100% !important;
+
             height: 46px !important;
             min-height: 46px !important;
-
-            padding: 0 24px !important;
 
             background: #4A3428 !important;
             color: #F4EFE7 !important;
@@ -212,25 +209,27 @@ st.markdown(
             border-radius: 3px !important;
 
             font-family:
+                "SF Pro Text",
+                "SF Pro Display",
+                -apple-system,
+                BlinkMacSystemFont,
                 "Segoe UI",
-                Arial,
                 sans-serif;
 
             font-size: 13px !important;
-            font-weight: 500 !important;
+            font-weight: 400 !important;
 
             box-shadow: none !important;
-
-            white-space: nowrap;
         }
 
-        .enter-button div[data-testid="stButton"] button:hover {
+        .enter-button-wrap div[data-testid="stButton"] > button:hover {
             background: #39271E !important;
             color: #F4EFE7 !important;
             border-color: #39271E !important;
         }
 
-        .enter-button div[data-testid="stButton"] button:focus {
+        .enter-button-wrap div[data-testid="stButton"] > button:active,
+        .enter-button-wrap div[data-testid="stButton"] > button:focus {
             background: #4A3428 !important;
             color: #F4EFE7 !important;
             border-color: #4A3428 !important;
@@ -246,13 +245,14 @@ st.markdown(
             margin: 14px auto 0 auto;
 
             font-family:
+                "SF Pro Text",
+                "SF Pro Display",
+                -apple-system,
+                BlinkMacSystemFont,
                 "Segoe UI",
-                Arial,
                 sans-serif;
 
             font-size: 13px;
-
-            text-align: left;
         }
 
 
@@ -266,13 +266,17 @@ st.markdown(
 
             background: #F4EFE7;
 
-            border-bottom: 1px solid #DDD1C0;
+            border-bottom: 1px solid #E0D6C6;
 
             display: flex;
             justify-content: flex-end;
         }
 
-        .logout-button div[data-testid="stButton"] button {
+        .logout-button div[data-testid="stButton"] {
+            margin: 0 !important;
+        }
+
+        .logout-button div[data-testid="stButton"] > button {
             height: 36px !important;
             min-height: 36px !important;
 
@@ -284,14 +288,22 @@ st.markdown(
             border: 1px solid #CFC2AE !important;
             border-radius: 3px !important;
 
+            font-family:
+                "SF Pro Text",
+                "SF Pro Display",
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
             font-size: 12px !important;
             font-weight: 400 !important;
         }
 
-        .logout-button div[data-testid="stButton"] button:hover {
+        .logout-button div[data-testid="stButton"] > button:hover {
             background: #FBF8F3 !important;
             color: #3A2B21 !important;
-            border-color: #80663D !important;
+            border-color: #A68B5B !important;
         }
 
 
@@ -299,7 +311,6 @@ st.markdown(
 
         div[data-testid="stIFrame"] {
             width: 100% !important;
-
             margin: 0 !important;
             padding: 0 !important;
         }
@@ -319,12 +330,8 @@ st.markdown(
                 padding: 7vh 20px 0 20px;
             }
 
-            .password-row {
-                display: block;
-            }
-
-            .enter-button {
-                padding-top: 10px;
+            .enter-button-wrap {
+                padding-top: 10px !important;
             }
 
         }
@@ -399,7 +406,7 @@ def password_gate():
         return False
 
 
-    # Password + button
+    # Password + Enter
 
     left, center, right = st.columns(
         [1, 8, 1]
@@ -423,13 +430,13 @@ def password_gate():
         with button_col:
 
             st.markdown(
-                '<div class="enter-button">',
+                '<div class="enter-button-wrap">',
                 unsafe_allow_html=True,
             )
 
             enter_clicked = st.button(
                 "Enter",
-                type="primary",
+                type="secondary",
                 use_container_width=True,
             )
 
@@ -498,6 +505,7 @@ if password_gate():
 
         if st.button(
             "Logout",
+            type="secondary",
             use_container_width=True,
         ):
 
